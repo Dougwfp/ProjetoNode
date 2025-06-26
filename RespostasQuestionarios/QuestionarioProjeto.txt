@@ -1,0 +1,51 @@
+Q1)
+
+1) 
+projeto criado.
+
+2)
+models/Cliente.js
+models/Produto.js
+models/Compra.js
+
+-----
+
+Recomendo o MongoDB porque:
+Permite mais flexibilidade na evolução do modelo de dados 
+Leitura e escrita mais rapida
+Interage bem om o Node
+
+3)
+middlewares/auth.js
+
+-----
+
+controllers/auth.controller.js
+
+4)
+tests/integration/compras.test.js
+
+-----
+
+As boas praticas que mais uso e recomendo seriam:
+Separação de resposabilidades,
+Middlewares para tratamento de erros e autenticação,
+Validação de dados,
+Variaveis de ambiente para configuações sensiveis,
+Documentação da API com Swagger
+Versionamento da API
+
+
+5)
+Aplicaria um sistema de Cache com Redis.
+Aplicaria um bom sistema de paginação nas pesquisas.
+Aplicaria um Cluster mode para aproveitar melhor as CPUs
+
+-----
+
+Aplicaria conteinerização usando Docker com Kubernets.
+Aplicaria filas para processamentos assíncronos.
+Aplicaria um balanceamento de carga usando Nginx ou AWS.
+Aplicaria CDN para contúdo estático.
+Aplicaria API Gateway para gerenciamneto de requisições.
+

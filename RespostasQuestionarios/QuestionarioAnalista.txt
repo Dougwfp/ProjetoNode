@@ -1,0 +1,158 @@
+Q1)
+
+Eu abordaria a situação priorizando inicialmente que os dois lados deixassem bem claro oque querem e explicar isso para os dois lados deixando a situação bem clara enquanto tentaria chegar em um meio termo que os dois pudessem entrar em um consenso bom para os dois lados.
+
+----------------
+
+A primeira tecnica seria fazer um Workshop de Requisitos que seria uma reunião para definir as prioridades dos requisitos enquanto tentava demonstrar a possiblidade da coexistencia da flexibilidade nas promoçoes e rigidez na cobrança, para assim conseguir chegar a um denominador em comum.
+
+A segunda tecnica seria fazer uma Prototipagem Rápida que seria cria uma demonstração visual como por exemplo um Prototipo mais simples de fazer e de entender para apresentar e receber feedbacks deles enquanto ajeito o Prototipo para tentar cumprir com as exigencias e entender junto com eles como seria possivel implementar as duas exigencias enquanto consigo adaptar qualquer nova mudança que surja.
+
+----------------
+
+Escohendo a Autentificação de duas etapas para contrapor ela com segurança e performance
+
+Eu usaria a Autenticação em duas etapas apenas para benefícios de alto valor, enquanto benefícios comuns usam cache de sessão para agilidade.
+E tambem usaria Processamento assíncrono em filas para manter a resposta rápida, mesmo em picos.
+
+O equilíbrio viria de priorizar segurança das transações críticas e performance nos casos cotidianos, com monitoramento contínuo para os ajustes.
+
+----------------
+
+Para a funcionalidade de cancelamento de assinatura, além do cenário de sucesso, dois cenários críticos são: 
+cancelamento durante período de carência.
+falha no gateway de pagamento. 
+Para garantir critérios de aceitação robustos, documentaria regras de negócio específicas (ex.: tratamento de carências, fallback para falhas) e validaria com stakeholders através de reuniões com exemplos reais e protótipos das mensagens de erro. 
+A estratégia incluiria testes de falhas controladas, com aprovação final do Financeiro.
+
+
+Exemplo de Tabela de Validação:
+
+Cenário	                    Critério de Aceitação	                        Validação com Stakeholder
+________________________    ________________________                        ________________________
+Cancelamento em carência	Sistema oferece opção de pausa ou agendamento.	Jurídico confirma conformidade com termos.
+Gateway de pagamento falha	Processo de fallback acionado em até 1h.	    Financeiro aprova mitigação de riscos.
+
+
+
+Q2)
+
+Para garantir flexibilidade, modelaria Benefício com um campo regras JSON para poder permitir novos tipos sem alterar schema e usaria uma tabela intermediária PlanoBeneficio para regras complexas. 
+Para performance, desnormalizaria levemente Assinatura com um cache de benefícios ativos.
+
+
+----------------
+
+
+No fluxo de uso de benefícios, dois pontos críticos são:
+Falha na API do parceiro.
+Concorrência em benefícios limitados. 
+
+Para otimizar e tornar o processo resiliente precisa fazer uma Comunicação com parceiros e um Controle de concorrência:
+
+Comunicação com parceiros: Timeout + retry com circuit breaker e fallback assíncrono, garantindo feedback imediato ao usuário.
+Controle de concorrência: Lock otimista e reserva temporária para evitar sobreuso, com filas para serializar requisições.
+
+A experiência do usuário é preservada com mensagens claras e alternativas quando falhas ocorrem, enquanto a integridade dos dados é mantida via logs e reconciliação periódica.
+
+
+Exemplo de Fluxo
+
+1. Usuário clica em "Usar Benefício"  
+   → Sistema valida localmente (cache).  
+2. API do parceiro é chamada (timeout: 3s).  
+   → Se falhar:  
+      - Tenta mais 2x.  
+      → Se persistir:  
+         - Coloca na fila e notifica usuário ("Tentaremos novamente").  
+3. Se sucesso:  
+   - Atualiza banco de dados com lock otimista.  
+   - Envia confirmação.  
+
+
+
+----------------
+
+
+Para o gateway de pagamento, eu usaria webhooks mais o processamento assíncrono para garantir confiabilidade, com fallbacks como filas de retentativa e Sagas para compensação. 
+Para APIs de parceiros, adotaria polling com cache e circuit breaker, evitando dependência direta em chamadas síncronas. 
+Essas estratégias concordam com monitoramento contínuo, como os log de falhas, e ajustes baseados em SLAs acordados com os stakeholders.
+
+
+Q3)
+
+Para garantir escalabilidade, resiliência e velocidade de desenvolvimento, proponho uma arquitetura baseada em microsserviços com os seguintes componentes:
+API Gateway.
+Serviço de Clientes.
+Serviço de Produtos.
+Serviço de Compras.
+Serviço de Pagamentos.
+Cache.
+
+----------------
+
+Estrategia de Lançamento
+
+Definição do MVP
+
+Funcionalidades Prioritárias:
+
+Cadastro e Autenticação de Clientes (Email/Senha + JWT).
+Catálogo Básico de Benefícios (Listagem, filtro por preço, detalhes).
+Processo Simplificado de Compra (Carrinho + checkout com gateway de pagamento).
+
+Estrategia de Desenvolvimeto
+
+Sprints Quinzenais:
+
+Mês 1: MVP funcional (cadastro + catálogo).
+Mês 2: Checkout + integração com pagamento.
+Mês 3: Testes, ajustes e lançamento controlado (beta para 1.000 usuários).
+
+
+
+Q4)
+
+Modelo de Dados: Flexível com JSON e relacionamentos dinâmicos, mas requer cuidados com consultas complexas.
+
+Fluxos de Processo: Combine locks otimistas com filas e fallbacks para melhor experiência do usuário.
+
+Integrações Críticas: Priorize webhooks para pagamentos e cache para parceiros, com circuit breakers para evitar cascatas de falhas.
+
+Exemplo Prático:
+Se um parceiro muda a API de cupons, o sistema continua funcionando com o cache enquanto uma atualização é implementada.
+
+
+
+Q5)
+
+Vantagens do Node.js:
+
+Eficiência em I/O Intensivo.
+Ecossistema Robustopara APIs.
+Produtividade e Stack Unificado.
+
+Desvantagens e Mitigações:
+
+CPU-bound tasks / delegar para workers e usar filas (RabbitMQ) para processamento pesado.
+Gerenciamento de concorrência / limitar o número de requisições por rota e usar cluster mode para multi-core.
+
+Cenários de Uso Ideal:
+
+Bom para: APIs RESTful, WebSockets (notificações em tempo real), integrações com gateways de pagamento.
+Ruim para: Processamento pesado de dados (ex.: relatórios complexos) – melhor usar Python ou Go.
+
+
+Avaliação do Frontend com Angular/Ionic:
+
+Cross-Platform.
+Produtividade.
+Manutenção.
+
+Desafios e Mitigações:
+
+Performance em UIs complexas / Otimizar change detection e lazy loading de módulos.
+Acesso a recursos nativos / Usar Capacitor e criar plugins customizados se necessário.
+
+
+
